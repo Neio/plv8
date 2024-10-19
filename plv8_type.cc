@@ -177,11 +177,13 @@ GetJsonbValue(JsonbValue *scalarVal) {
   if (scalarVal->type == jbvNull) {
 		return Local<v8::Value>::New(isolate, Null(isolate));
   } else if (scalarVal->type == jbvString) {
-    char t[ scalarVal->val.string.len + 1 ];
+	char* t = new char[scalarVal->val.string.len + 1];
     strncpy(t, scalarVal->val.string.val, scalarVal->val.string.len);
     t[ scalarVal->val.string.len ] = '\0';
 
-		return Local<v8::Value>::New(isolate, v8::String::NewFromUtf8(isolate, t).ToLocalChecked());
+	Local<v8::Value> result = Local<v8::Value>::New(isolate, v8::String::NewFromUtf8(isolate, t).ToLocalChecked());
+	delete [] t;
+	return result;
   } else if (scalarVal->type == jbvNumeric) {
 		return Local<v8::Value>::New(isolate, Number::New(isolate, DatumGetFloat8(DirectFunctionCall1(numeric_float8, PointerGetDatum(scalarVal->val.numeric)))));
   } else if (scalarVal->type == jbvBool) {

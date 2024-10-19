@@ -7,7 +7,7 @@ set(VENDOR "")
 
 set(VERSION_MAJOR "3")
 set(VERSION_MINOR "1")
-set(VERSION_PATCH "0")
+set(VERSION_PATCH "10")
 
 set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
@@ -25,12 +25,13 @@ set(EXTENSION_DATA_DIR "share/extension")
 set(DOCUMENT_DIR "share/${PROJECT_ID}")
 
 set(SOURCES
-  "coffee-script.cc"
-  "livescript.cc"
-  "../plv8.cc"
-  "../plv8_func.cc"
-  "../plv8_param.cc"
-  "../plv8_type.cc")
+  "prebuild/coffee-script.cc"
+  "prebuild/livescript.cc"
+  "../../plv8.cc"
+  "../../plv8_func.cc"
+  "../../plv8_param.cc"
+  "../../plv8_allocator.cc"
+  "../../plv8_type.cc")
 
 
 include_directories(
@@ -42,7 +43,9 @@ include_directories(
   ".")
 
 link_directories(
-  "${POSTGRESQL_DIR}/lib")
+  "${POSTGRESQL_DIR}/lib"
+  "vendor/v8/out.gn/x64.release/obj/"
+  )
 
 add_library("${LIBRARY_NAME}" SHARED ${SOURCES})
 set_target_properties("${LIBRARY_NAME}"
@@ -51,13 +54,20 @@ set_target_properties("${LIBRARY_NAME}"
 
 set_source_files_properties(${SOURCES}
   PROPERTIES
-  COMPILE_FLAGS "/EHsc")
+  COMPILE_FLAGS " /EHsc /MT")
 
 target_link_libraries("${LIBRARY_NAME}"
   "postgres.lib"
-  "vendor/v8/out.gn/x64.release/v8.dll"
-  "vendor/v8/out.gn/x64.release/v8_libbase.dll"
-  "vendor/v8/out.gn/x64.release/v8_libplatform.dll")
+  "v8_monolith"
+  "v8_libplatform"
+  "v8_libbase"
+  "winmm"
+  "dbghelp")
+
+add_compile_definitions($<$<CONFIG:Debug>:_ITERATOR_DEBUG_LEVEL=0>)
+add_compile_definitions(JSONB_DIRECT_CONVERSION)
+add_compile_definitions(V8_COMPRESS_POINTERS=1)
+add_compile_definitions(V8_31BIT_SMIS_ON_64BIT_ARCH=1)
 
 install(TARGETS "${LIBRARY_NAME}"
   DESTINATION "${EXTENSION_DIR}")
@@ -86,15 +96,6 @@ install(FILES
   "plls--${VERSION_FULL}.sql"
   DESTINATION "${EXTENSION_DATA_DIR}")
 
-install(FILES
-  "./vendor/v8/out.gn/x64.release/v8.dll"
-  DESTINATION "bin")
-install(FILES
-  "./vendor/v8/out.gn/x64.release/v8_libbase.dll"
-  DESTINATION "bin")
-install(FILES
-  "./vendor/v8/out.gn/x64.release/v8_libplatform.dll"
-  DESTINATION "bin")
 
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)

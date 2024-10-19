@@ -12,6 +12,7 @@ Additional requirements to build V8:
 * Python 2
 * unzip.exe
 * patch.exe - part of the Git install
+* Ninja
 
 ## Patching Postgres
 
@@ -19,12 +20,12 @@ Currently, Postgres requires a patch of one or more `include` files in order to
 compile PLV8.
 
 First, find the directory that contains the `include` files.  This will typically
-be inside something like `C:\Program Files\PostgreSQL\10\include`, where the `10`
+be inside something like `C:\Program Files\PostgreSQL\16\include`, where the `16`
 is your version number.  Inside of the `include` directory:
 
 ```
 PS> cd server\port\atomics
-PS> copy \plv8\windows\generic-msvc.h.patch .
+PS> copy \plv8\platforms\windows\generic-msvc.h.patch .
 PS> patch < generic-msvc.h.patch
 ```
 
@@ -44,6 +45,7 @@ specifying the path to your Postgres install, the version of Postgres you are
 running, as well as the build target.  Build targets will typically be one of the
 following:
 
+* `Visual Studio 16 2019` - MSVC 2019
 * `Visual Studio 15 2017` - 32 bit, MSVC 2017
 * `Visual Studio 15 2017 Win64` - 64 bit, MSVC 2017
 * `Visual Studio 14 2015` - 32 bit, MSVC 2015
@@ -52,7 +54,7 @@ following:
 * `Visual Studio 12 2013 Win64` - 64 bit, MSVC 2013
 
 ```
-PS> cmake . -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX="C:\Program Files\PostgreSQL\10" -DPOSTGRESQL_VERSION=10
+PS> cmake . -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX="C:\Program Files\PostgreSQL\16" -DPOSTGRESQL_VERSION=16
 ```
 
 ## Compiling

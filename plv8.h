@@ -8,6 +8,9 @@
 #ifndef _PLV8_
 #define _PLV8_
 
+extern "C" {
+#include "postgres.h"
+}
 #include "plv8_config.h"
 #include <v8.h>
 #ifdef ENABLE_DEBUGGER_SUPPORT
@@ -17,7 +20,6 @@
 #include <vector>
 
 extern "C" {
-#include "postgres.h"
 
 #include "access/htup.h"
 #include "fmgr.h"
