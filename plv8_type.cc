@@ -164,11 +164,10 @@ GetJsonbValue(JsonbValue *scalarVal) {
   if (scalarVal->type == jbvNull) {
 		return Local<v8::Value>::New(isolate, Null(isolate));
   } else if (scalarVal->type == jbvString) {
-    char t[ scalarVal->val.string.len + 1 ];
-    strncpy(t, scalarVal->val.string.val, scalarVal->val.string.len);
-    t[ scalarVal->val.string.len ] = '\0';
-
-		return Local<v8::Value>::New(isolate, v8::String::NewFromUtf8(isolate, t).ToLocalChecked());
+		return Local<v8::Value>::New(isolate,
+			v8::String::NewFromUtf8(isolate, scalarVal->val.string.val,
+				v8::NewStringType::kNormal,
+				scalarVal->val.string.len).ToLocalChecked());
   } else if (scalarVal->type == jbvNumeric) {
 		return Local<v8::Value>::New(isolate, Number::New(isolate, DatumGetFloat8(DirectFunctionCall1(numeric_float8, PointerGetDatum(scalarVal->val.numeric)))));
   } else if (scalarVal->type == jbvBool) {
@@ -754,7 +753,7 @@ ToScalarDatum(Handle<v8::Value> value, bool *isnull, plv8_type *type)
 #if JSONB_DIRECT_CONVERSION
 		{
 			Jsonb *obj = ConvertObject(Local<v8::Object>::Cast(value));
-			PG_RETURN_JSONB_P(DatumGetJsonbP((unsigned long)obj));
+			PG_RETURN_JSONB_P(obj);
 		}
 #else // JSONB_DIRECT_CONVERSION
 		if (value->IsObject() || value->IsArray())

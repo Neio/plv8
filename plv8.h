@@ -9,12 +9,9 @@
 #define _PLV8_
 
 #include "plv8_config.h"
-#include <v8.h>
-#ifdef ENABLE_DEBUGGER_SUPPORT
-#include <v8-debug.h>
-#endif  // ENABLE_DEBUGGER_SUPPORT
-#include <v8-version-string.h>
-#include <vector>
+
+// _STAT_DEFINED is passed via /D from CMakeLists so UCRT sys/stat.h defers
+// to PostgreSQL's win32_port.h definition of struct stat (no guard there).
 
 extern "C" {
 #include "postgres.h"
@@ -25,6 +22,21 @@ extern "C" {
 #include "utils/tuplestore.h"
 #include "windowapi.h"
 }
+
+#ifdef _MSC_VER
+// PostgreSQL/Winsock defines bind() as a macro; undef it so <functional> can
+// define std::bind without a macro collision.
+#ifdef bind
+#undef bind
+#endif
+#endif
+
+#include <v8.h>
+#ifdef ENABLE_DEBUGGER_SUPPORT
+#include <v8-debug.h>
+#endif  // ENABLE_DEBUGGER_SUPPORT
+#include <v8-version-string.h>
+#include <vector>
 #include <string>
 
 #ifdef _MSC_VER
